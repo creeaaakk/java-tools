@@ -50,14 +50,14 @@ public class ThreadedQueue<T>
 
   public ThreadedQueue(ThreadedRunnable<T> runnable, ExecutorService pool, long timeoutMillis)
   {
-    if (runnable == null)
-    {
-      throw new IllegalArgumentException("runnable is null");
-    }
-
     if (timeoutMillis < 0)
     {
       throw new IllegalArgumentException("negative timeoutMillis: " + timeoutMillis);
+    }
+
+    if (runnable != null)
+    {
+      setRunnable(runnable);
     }
 
     if (pool == null)
@@ -66,7 +66,6 @@ public class ThreadedQueue<T>
     }
 
     this.pool = pool;
-    this.runnable = runnable;
     this.timeoutMillis = timeoutMillis;
   }
 
