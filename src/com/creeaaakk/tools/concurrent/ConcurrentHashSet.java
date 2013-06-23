@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package com.creeaaakk.tools.util;
+package com.creeaaakk.tools.concurrent;
 
 import java.io.Serializable;
 import java.util.Collection;
