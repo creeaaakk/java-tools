@@ -59,4 +59,20 @@ public final class MathUtil
   {
     return java.lang.Math.sqrt(squareDistance(x1, y1, x2, y2));
   }
+
+  /**
+   * Converts radians to degrees.
+   */
+  public static double radiansToDegrees(double radians)
+  {
+    return radians * 180.0 / Math.PI;
+  }
+
+  /**
+   * Converts degrees to radians.
+   */
+  public static double degreesToRadians(double degrees)
+  {
+    return degrees * Math.PI / 180.0;
+  }
 }
