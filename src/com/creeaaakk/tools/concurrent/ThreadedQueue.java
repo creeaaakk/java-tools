@@ -24,7 +24,7 @@ public class ThreadedQueue<T>
   {
     @SuppressWarnings("unchecked")
     @Override
-    public void call(Object object)
+    public void callIn(Object object)
     {
       runnable = (ThreadedRunnable<T>) object;
     }
@@ -75,7 +75,7 @@ public class ThreadedQueue<T>
    */
   public void setRunnable(ThreadedRunnable<T> runnable)
   {
-    setRunnable.run(runnable);
+    setRunnable.callIn(runnable);
   }
 
   public void enqueue(T item)
