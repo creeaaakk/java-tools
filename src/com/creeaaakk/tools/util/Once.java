@@ -12,8 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * In blocking mode, if multiple threads try to run the callback, they will
  * block until the callback has finished running.
  * 
- * In non-blocking mode, if multiple threads try to run the callback, they will
- * not block and instead do nothing.
+ * In non-blocking mode, if multiple threads try to run the callback, the
+ * superfluous threads will not block and instead do nothing.
  */
 public class Once implements Runnable, InCallback, OutCallback, InOutCallback
 {
