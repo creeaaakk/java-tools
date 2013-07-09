@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Queue;
 
 public class CycleQueue<T> implements Queue<T>
@@ -127,12 +128,22 @@ public class CycleQueue<T> implements Queue<T>
   @Override
   public T element()
   {
+    if (isEmpty())
+    {
+      throw new NoSuchElementException();
+    }
+
     return queue.get(getIndex());
   }
 
   @Override
   public T peek()
   {
+    if (isEmpty())
+    {
+      return null;
+    }
+
     return queue.get(getIndex());
   }
 
