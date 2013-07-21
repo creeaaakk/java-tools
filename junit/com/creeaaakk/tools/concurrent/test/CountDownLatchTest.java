@@ -1,8 +1,10 @@
-package com.creeaaakk.tools.concurrent;
+package com.creeaaakk.tools.concurrent.test;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
+
+import com.creeaaakk.tools.concurrent.CountDownLatch;
 
 public class CountDownLatchTest extends TestCase
 {

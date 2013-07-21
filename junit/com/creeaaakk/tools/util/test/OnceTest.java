@@ -1,8 +1,13 @@
-package com.creeaaakk.tools.util;
+package com.creeaaakk.tools.util.test;
 
 import junit.framework.TestCase;
 
 import org.junit.Test;
+
+import com.creeaaakk.tools.util.InCallback;
+import com.creeaaakk.tools.util.InOutCallback;
+import com.creeaaakk.tools.util.Once;
+import com.creeaaakk.tools.util.OutCallback;
 
 public class OnceTest extends TestCase
 {
