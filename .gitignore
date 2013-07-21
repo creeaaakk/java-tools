@@ -8,7 +8,8 @@
 # Eclipse Files #
 /.classpath
 /.project
-/bin
 /.settings
+/bin/
 
+# Maven Files #
 /target/
