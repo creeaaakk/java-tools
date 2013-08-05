@@ -36,21 +36,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * callback, a null is supplied. If a callback does not return a value but a
  * return value is expected in the call to the Once, null is returned.
  * 
- * In blocking mode, if multiple threads try to run the callback, they will
- * block until the callback has finished running.
+ * In blocking mode (default), if multiple threads try to run the callback, they
+ * will block until the callback has finished running.
  * 
  * In non-blocking mode, if multiple threads try to run the callback, the
  * superfluous threads will not block and instead do nothing.
+ * 
+ * Superfluous calls that expect to return a value return null.
  */
 public class Once implements Runnable, InCallback, OutCallback, InOutCallback
 {
-  private final AtomicBoolean done = new AtomicBoolean(false);
-  private final boolean blocking;
+  private final AtomicBoolean doneNonBlocking;
+  private final Runnable runnable;
+  private final InCallback inCallback;
+  private final OutCallback outCallback;
+  private final InOutCallback inOutCallback;
 
-  private Runnable runnable;
-  private InCallback inCallback;
-  private OutCallback outCallback;
-  private InOutCallback inOutCallback;
+  private boolean doneBlocking = false;
 
   public Once(Runnable runnable)
   {
@@ -80,7 +82,10 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
     }
 
     this.runnable = runnable;
-    this.blocking = blocking;
+    this.inCallback = null;
+    this.outCallback = null;
+    this.inOutCallback = null;
+    this.doneNonBlocking = blocking ? null : new AtomicBoolean(false);
   }
 
   public Once(InCallback inCallback, boolean blocking)
@@ -90,8 +95,11 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
       throw new IllegalArgumentException("inCallback is null");
     }
 
+    this.runnable = null;
     this.inCallback = inCallback;
-    this.blocking = blocking;
+    this.outCallback = null;
+    this.inOutCallback = null;
+    this.doneNonBlocking = blocking ? null : new AtomicBoolean(false);
   }
 
   public Once(OutCallback outCallback, boolean blocking)
@@ -101,8 +109,11 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
       throw new IllegalArgumentException("outCallback is null");
     }
 
+    this.runnable = null;
+    this.inCallback = null;
     this.outCallback = outCallback;
-    this.blocking = blocking;
+    this.inOutCallback = null;
+    this.doneNonBlocking = blocking ? null : new AtomicBoolean(false);
   }
 
   public Once(InOutCallback inOutCallback, boolean blocking)
@@ -112,8 +123,11 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
       throw new IllegalArgumentException("inOutCallback is null");
     }
 
+    this.runnable = null;
+    this.inCallback = null;
+    this.outCallback = null;
     this.inOutCallback = inOutCallback;
-    this.blocking = blocking;
+    this.doneNonBlocking = blocking ? null : new AtomicBoolean(false);
   }
 
   public void run()
@@ -136,13 +150,13 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
   @Override
   public Object callInOut(Object object)
   {
-    if (blocking)
+    if (doneNonBlocking != null)
     {
-      return executeBlocking(object);
+      return executeNonBlocking(object);
     }
     else
     {
-      return executeNonBlocking(object);
+      return executeBlocking(object);
     }
   }
 
@@ -150,13 +164,14 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
   {
     Object ret = null;
 
-    if (!done.get())
+    if (!doneBlocking)
     {
       synchronized (this)
       {
-        if (!done.getAndSet(true))
+        if (!doneBlocking)
         {
           ret = execute(object);
+          doneBlocking = true;
         }
       }
     }
@@ -168,7 +183,7 @@ public class Once implements Runnable, InCallback, OutCallback, InOutCallback
   {
     Object ret = null;
 
-    if (!done.getAndSet(true))
+    if (!doneNonBlocking.getAndSet(true))
     {
       ret = execute(object);
     }
