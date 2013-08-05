@@ -34,7 +34,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
-public class CycleQueue<T> implements Queue<T>
+/**
+ * A CycleQueue works similar to standard queues, but elements are never removed.
+ * Instead, when the end of the queue is reached, it starts returning values from
+ * the beginning again. The queue is backed by a java.util.ArrayList. This class
+ * is not thread safe.
+ * 
+ * @author Daniel Tashjian
+ */
+public class CycleQueue<T> implements Queue<T>, Iterable<T>
 {
   private final List<T> queue = new ArrayList<T>();
 
@@ -70,7 +78,28 @@ public class CycleQueue<T> implements Queue<T>
   @Override
   public Iterator<T> iterator()
   {
-    return queue.iterator();
+    return new Iterator<T>()
+    {
+      private final Iterator<T> iterator = queue.iterator();
+
+      @Override
+      public boolean hasNext()
+      {
+        return iterator.hasNext();
+      }
+
+      @Override
+      public T next()
+      {
+        return iterator.next();
+      }
+
+      @Override
+      public void remove() throws UnsupportedOperationException
+      {
+        throw new UnsupportedOperationException("CycleQueue does not allow removal of elements.");
+      }
+    };
   }
 
   @Override
@@ -85,10 +114,15 @@ public class CycleQueue<T> implements Queue<T>
     return queue.toArray(a);
   }
 
+  /**
+   * Throws UnsupportedOperationException.
+   * 
+   * @throws UnsupportedOperationException always
+   */
   @Override
-  public boolean remove(Object o)
+  public boolean remove(Object o) throws UnsupportedOperationException
   {
-    return queue.remove(o);
+    throw new UnsupportedOperationException("CycleQueue does not allow removal of elements.");
   }
 
   @Override
@@ -121,18 +155,33 @@ public class CycleQueue<T> implements Queue<T>
     queue.clear();
   }
 
+  /**
+   * Adds the given element to the queue (same as offer(T)).
+   * 
+   * @return true if the collection changed as a result of this call
+   */
   @Override
   public boolean add(T e)
   {
     return queue.add(e);
   }
 
+  /**
+   * Adds the given element to the queue (same as add(T)).
+   * 
+   * @return true if the collection changed as a result of this call
+   */
   @Override
   public boolean offer(T e)
   {
-    return queue.add(e);
+    return add(e);
   }
 
+  /**
+   * Retrieves the next value and advances the queue (same as poll()).
+   * 
+   * @return the next value, or null if empty
+   */
   @Override
   public T remove()
   {
@@ -146,12 +195,23 @@ public class CycleQueue<T> implements Queue<T>
     return ret;
   }
 
+  /**
+   * Retrieves the next value and advances the queue (same as remove()).
+   * 
+   * @return the next value, or null if empty
+   */
   @Override
   public T poll()
   {
     return remove();
   }
 
+  /**
+   * Retrieves the next value but does not advance the queue.
+   * 
+   * @return the next value
+   * @throws NoSuchElementException is empty
+   */
   @Override
   public T element()
   {
@@ -163,6 +223,11 @@ public class CycleQueue<T> implements Queue<T>
     return queue.get(getIndex());
   }
 
+  /**
+   * Retrieves the next value but does not advance the queue.
+   * 
+   * @return the next value, or null if empty
+   */
   @Override
   public T peek()
   {
@@ -176,7 +241,12 @@ public class CycleQueue<T> implements Queue<T>
 
   private int getIndex()
   {
-    return index = index % queue.size();
+    if (index >= queue.size())
+    {
+      index = 0;
+    }
+
+    return index;
   }
 
   private void incIndex()
