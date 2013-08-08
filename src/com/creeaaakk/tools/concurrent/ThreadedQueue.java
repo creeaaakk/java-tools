@@ -47,44 +47,48 @@ public class ThreadedQueue<T>
   private final BlockingQueue<T> queue = new LinkedBlockingQueue<T>();
   private final long timeoutMillis;
 
-  private final Once setRunnable = new Once(new InCallback()
+  private final Once setCallback = new Once(new InCallback()
   {
-    @SuppressWarnings("unchecked")
     @Override
     public void callIn(Object object)
     {
-      runnable = (ThreadedRunnable<T>) object;
+      callback = (InCallback) object;
     }
   });
 
-  private ThreadedRunnable<T> runnable;
+  private InCallback callback;
   private Future<?> task;
 
-  public ThreadedQueue(ThreadedRunnable<T> runnable)
+  public ThreadedQueue()
   {
-    this(runnable, defaultPool, DEFAULT_TIMEOUT);
+    this(null, defaultPool, DEFAULT_TIMEOUT);
   }
 
-  public ThreadedQueue(ThreadedRunnable<T> runnable, ExecutorService pool)
+  public ThreadedQueue(InCallback callback)
   {
-    this(runnable, pool, DEFAULT_TIMEOUT);
+    this(callback, defaultPool, DEFAULT_TIMEOUT);
   }
 
-  public ThreadedQueue(ThreadedRunnable<T> runnable, long timeoutMillis)
+  public ThreadedQueue(InCallback callback, ExecutorService pool)
   {
-    this(runnable, defaultPool, timeoutMillis);
+    this(callback, pool, DEFAULT_TIMEOUT);
   }
 
-  public ThreadedQueue(ThreadedRunnable<T> runnable, ExecutorService pool, long timeoutMillis)
+  public ThreadedQueue(InCallback callback, long timeoutMillis)
+  {
+    this(callback, defaultPool, timeoutMillis);
+  }
+
+  public ThreadedQueue(InCallback callback, ExecutorService pool, long timeoutMillis)
   {
     if (timeoutMillis < 0)
     {
       throw new IllegalArgumentException("negative timeoutMillis: " + timeoutMillis);
     }
 
-    if (runnable != null)
+    if (callback != null)
     {
-      setRunnable(runnable);
+      setCallback(callback);
     }
 
     if (pool == null)
@@ -100,9 +104,16 @@ public class ThreadedQueue<T>
    * Sets the runnable that will process the queued items. This can only be
    * set once.
    */
-  public void setRunnable(ThreadedRunnable<T> runnable)
+  public void setCallback(InCallback callback)
   {
-    setRunnable.callIn(runnable);
+    if (callback != null)
+    {
+      setCallback.callIn(callback);
+    }
+    else
+    {
+      throw new NullPointerException("callback is null");
+    }
   }
 
   public void enqueue(T item)
@@ -144,7 +155,7 @@ public class ThreadedQueue<T>
                 }
                 else
                 {
-                  runnable.run(item);
+                  callback.callIn(item);
                 }
               }
               catch (InterruptedException exception)

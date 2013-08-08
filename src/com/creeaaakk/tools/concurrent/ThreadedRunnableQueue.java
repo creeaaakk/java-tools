@@ -29,34 +29,36 @@ package com.creeaaakk.tools.concurrent;
 
 import java.util.concurrent.ExecutorService;
 
+import com.creeaaakk.tools.util.InCallback;
+
 public class ThreadedRunnableQueue extends ThreadedQueue<Runnable>
 {
-  private static final ThreadedRunnable<Runnable> threadedRunnable = new ThreadedRunnable<Runnable>()
+  private static final InCallback callback = new InCallback()
   {
     @Override
-    public void run(Runnable item)
+    public void callIn(Object item)
     {
-      item.run();
+      ((Runnable) item).run();
     }
   };
 
   public ThreadedRunnableQueue()
   {
-    super(threadedRunnable);
+    super(callback);
   }
 
   public ThreadedRunnableQueue(ExecutorService pool)
   {
-    super(threadedRunnable, pool);
+    super(callback, pool);
   }
 
   public ThreadedRunnableQueue(long timeoutMillis)
   {
-    super(threadedRunnable, timeoutMillis);
+    super(callback, timeoutMillis);
   }
 
   public ThreadedRunnableQueue(ExecutorService pool, long timeoutMillis)
   {
-    super(threadedRunnable, pool, timeoutMillis);
+    super(callback, pool, timeoutMillis);
   }
 }
